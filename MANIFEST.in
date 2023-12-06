@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include ury_pulse *.css
+recursive-include ury_pulse *.csv
+recursive-include ury_pulse *.html
+recursive-include ury_pulse *.ico
+recursive-include ury_pulse *.js
+recursive-include ury_pulse *.json
+recursive-include ury_pulse *.md
+recursive-include ury_pulse *.png
+recursive-include ury_pulse *.py
+recursive-include ury_pulse *.svg
+recursive-include ury_pulse *.txt
+recursive-exclude ury_pulse *.pyc
