@@ -43,6 +43,9 @@
 8. Customer Data
 9. Repeated Customers
 10. Employee Sales
+11. Employee Item Wise Sales
+12. Service Wise Sales
+13. Time Wise Sales
   
 
 ### Customizable Branch Timings: 
