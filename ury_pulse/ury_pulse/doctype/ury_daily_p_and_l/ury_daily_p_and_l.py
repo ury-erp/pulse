@@ -7,6 +7,56 @@ import json
 import calendar
 from datetime import datetime
 
+def inner_bom_process(buying_price_list, bom):
+    unset_bom_items = []
+    bom_buying_price = 0
+
+    for bom_item in bom.items:
+        bom_item_qty = bom_item.qty
+        bom_item_name = bom_item.item_name
+        boms = frappe.db.get_all("BOM", fields=("*"), filters={'item': bom_item.item_code, 'is_active': 1, 'is_default': 1, 'docstatus': 1})
+        
+        if len(boms) > 0:
+            inner_bom = frappe.get_doc("BOM", boms[0].name)
+            inner_bom_data = inner_inner_bom_process(buying_price_list, inner_bom)
+            inner_bom_buying_price = inner_bom_data['bom_buying_price']
+            inner_unset_bom_items = inner_bom_data['unset_bom_items']
+            bom_buying_price += float(inner_bom_buying_price) * bom_item_qty
+
+            for item in inner_unset_bom_items:
+                if item not in unset_bom_items:
+                    unset_bom_items.append(item)
+        else:
+            bom_items_price = frappe.db.get_all("Item Price", fields=['name', 'price_list_rate'], filters={'price_list': buying_price_list, 'item_code': bom_item.item_code})
+
+            if len(bom_items_price) == 0:
+                if bom_item_name not in unset_bom_items:
+                    unset_bom_items.append(bom_item_name)
+            else:
+                bom_buying_price += float(bom_items_price[0].price_list_rate) * bom_item_qty
+
+    bom_buying_price = bom_buying_price / bom.quantity
+    return {"bom_buying_price": bom_buying_price, "unset_bom_items": unset_bom_items}
+
+
+def inner_inner_bom_process(buying_price_list, bom):
+    unset_bom_items = []
+    bom_buying_price = 0
+
+    for bom_item in bom.items:
+        bom_item_qty = bom_item.qty
+        bom_item_name = bom_item.item_name
+        bom_items_price = frappe.db.get_all("Item Price", fields=['name', 'price_list_rate'], filters={'price_list': buying_price_list, 'item_code': bom_item.item_code})
+        if len(bom_items_price) == 0:
+            if bom_item_name not in unset_bom_items:
+                unset_bom_items.append(bom_item_name)
+        else:
+            bom_buying_price += float(bom_items_price[0].price_list_rate) * bom_item_qty
+
+    bom_buying_price = bom_buying_price / bom.quantity
+    return {"bom_buying_price": bom_buying_price, "unset_bom_items": unset_bom_items}
+
+
 class URYDailyPandL(Document):
 	def cogs_sold(self):
 		report_settings = frappe.get_doc("URY Report Settings",self.branch)
@@ -108,19 +158,15 @@ class URYDailyPandL(Document):
 				item_qty = pb_item.qty
 				boms = frappe.db.get_all("BOM",fields = ("*"),filters = {'item':pb_item.item_code,'is_active':1,'is_default':1,'docstatus':1})
 				if len(boms) > 0:
-					bom_buying_price = 0
+					buying_price_list = report_settings.buying_price_list
 					bom = frappe.get_doc("BOM",boms[0].name)
-					for bom_item in bom.items:
-						bom_item_qty = bom_item.qty
-						bom_item_name = bom_item.item_name
-						bom_items_price = frappe.db.get_all("Item Price",fields = ['name','price_list_rate'],filters = {'price_list':report_settings.buying_price_list,'item_code':bom_item.item_code})
-						if len(bom_items_price) == 0:
-							if bom_item_name not in unset_bom_item_prices:
-								unset_bom_item_prices.append(bom_item_name)
-						else:
-							bom_buying_price += float(bom_items_price[0].price_list_rate)*bom_item_qty
-					bom_buying_price = bom_buying_price/bom.quantity
+					bom_data = inner_bom_process(buying_price_list,bom)
+					bom_buying_price = bom_data['bom_buying_price']
+					unset_bom_items = bom_data['unset_bom_items']
 					buying_price += float(bom_buying_price)*item_qty
+					for unset_item in unset_bom_items:
+						if unset_item not in unset_bom_item_prices:
+							unset_bom_item_prices.append(unset_item)
 				else:
 					sub_item = frappe.get_doc("Item",pb_item.item_code)
 					item_name = sub_item.item_name
