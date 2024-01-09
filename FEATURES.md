@@ -23,6 +23,7 @@
  - Direct Expenses: The sum of consumables and other direct fixed expenses.
  - Cost of Goods Sold: This includes the cost of the items sold, factoring in product bundles and Bill of Materials (BOM) sub-items. 
 - Gross Profit/Loss: The difference between gross sales and the cost of goods sold.
+- Employee Cost: The total Employee Cost for the day, including wages, salaries, benefits, and any other related expenses. This cost is part of the Total Indirect Expense.
 - Indirect Expenses: The total of indirect fixed expenses and any percentage-based expenses.
 - Net Profit/Loss: The final profit or loss for the day.
  

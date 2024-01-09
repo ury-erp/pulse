@@ -215,3 +215,19 @@ app_license = "MIT"
 # auth_hooks = [
 #	"ury_pulse.auth.validate"
 # ]
+
+fixtures = [
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            [
+                "name",
+                "in",
+                {
+                    "Employee-payment_amount",
+                    "Employee-payment_type",
+                },
+            ]
+        ],
+    }
+]

@@ -88,11 +88,11 @@
                                 <td>{{ frappe.utils.fmt_money(data.gross_profit or '', currency=currency) }}</td>
                                 <td>{{ data.gross_profit_percent }}%</td>
                             </tr>
-                            <!-- <tr>
+                            <tr>
                                 <td class="text-left font-bold">{{ _('Employee Cost') }}</td>
                                 <td>{{ frappe.utils.fmt_money(data.total_employee_costs or '', currency=currency) }}</td>
                                 <td>{{ data.total_employee_costs_percent }}%</td>
-                            </tr> -->
+                            </tr>
                             {% for expense in data.indirect_expenses_breakup %}
                             <tr>
                                 <td class="text-left font-bold">{{ expense.breakup }}</td>

@@ -262,7 +262,7 @@ class URYDailyPandL(Document):
 		self.net_sales = self.gross_sales - self.cash_discount_round_off - self.tax
 
 		if self.net_sales == 0.0:
-			self.gross_sales_percent = self.cash_discount_round_off_percent = self.tax_percent = self.cogs_percent = self.total_direct_expenses_percent = self.gross_profit_percent = self.other_expenses_percent = self.depreciation_percent = self.total_indirect_expenses_percent = self.net_profit_percent = 0.0
+			self.gross_sales_percent = self.cash_discount_round_off_percent = self.tax_percent = self.cogs_percent = self.total_direct_expenses_percent = self.gross_profit_percent = self.total_employee_costs_percent = self.other_expenses_percent = self.depreciation_percent = self.total_indirect_expenses_percent = self.net_profit_percent = 0.0
 		else:
 			self.gross_sales_percent = round(((self.gross_sales / self.net_sales) * 100),2)
 			self.cash_discount_round_off_percent = round(((self.cash_discount_round_off / self.net_sales) * 100),2)
@@ -298,9 +298,115 @@ class URYDailyPandL(Document):
 
 		'''INDIRECT EXPENSES'''
 
+		self.total_indirect_expenses = 0
+
+
+		#EMPLOYEE COSTS
+		salary_cost_gross = 0
+		self.total_employee_costs = 0
+
+		attendance_count = frappe.db.sql('''
+			SELECT
+				%(date)s AS "Date",
+				COUNT(b.`name`) AS "Total Attendance"
+			FROM `tabAttendance` b
+			LEFT JOIN `tabEmployee` c ON 
+			c.name = b.employee
+			WHERE 
+				b.`attendance_date` = %(date)s
+				AND c.`branch` = %(branch)s
+				AND b.`docstatus` = 1
+				AND b.`status` IN ("Present", "Half Day")
+		''', {"branch": self.branch, "date": self.date}, as_dict=True)    
+
+		attendance_count =  attendance_count[0]
+
+		if attendance_count['Total Attendance'] == 0:
+			frappe.throw(title='No Attendance !',msg=("Attendance not marked"))
+
+		ns_employee_attendance_list = frappe.db.sql(''' 
+			SELECT
+				b.`employee_name` AS "Name"
+			FROM `tabAttendance` b
+			LEFT JOIN `tabEmployee` c ON (
+				c.name = b.employee
+				AND (
+					(c.`payment_amount` IS NULL OR c.`payment_amount` = 0.0 ) 
+					OR 
+					(c.`payment_type` IS NULL OR c.`payment_type` = "")
+				)
+			)
+			WHERE 
+				b.`attendance_date` = %(date)s
+				AND c.`branch` = %(branch)s
+			GROUP BY
+				b.`employee_name`                
+		''', {"branch": self.branch, "date": self.date}, as_dict=True)
+
+		if len(ns_employee_attendance_list) > 0:
+			ns_employee_attendance_list = json.dumps(ns_employee_attendance_list)
+			frappe.throw(title='Set Payment Type/Amount',msg=("Employees:  {0}").format(ns_employee_attendance_list))
+
+		employee_attendance_dw_list = frappe.db.sql('''
+			SELECT
+				%(date)s AS "Date",
+				b.`employee` AS "Employee",
+				b.`status` AS "Status",
+				c.`payment_amount` AS "Salary"
+			FROM `tabAttendance` b
+			LEFT JOIN `tabEmployee` c ON c.name = b.employee
+			WHERE 
+				b.`attendance_date` = %(date)s
+				AND c.`branch` = %(branch)s
+				AND c.`payment_type` = "Daily Wage"                        
+		''', {"branch": self.branch, "date": self.date}, as_dict=True)
+
+		for attendance in employee_attendance_dw_list:
+			if attendance["Status"] == "Half Day":
+				salary_cost_gross = round((salary_cost_gross + 0.5 * attendance["Salary"]),2)
+			if attendance["Status"] == "Present":
+				salary_cost_gross = round((salary_cost_gross + attendance["Salary"]),2)
+
+		date_str =  self.date
+		date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+		year = date_obj.year
+		month_number = date_obj.month
+		days = calendar.monthrange(year, month_number)[1]
+
+		employee_attendance_sl_list = frappe.db.sql('''
+			SELECT
+				%(date)s AS "Date",
+				b.`name` AS "Employee",
+				b.`payment_amount` AS "Salary"
+			FROM `tabEmployee` b
+			WHERE 
+				b.`branch` = %(branch)s
+				AND b.`payment_type` = "Salary"                        
+		''', {"branch": self.branch, "date": self.date}, as_dict=True)
+
+		for attendance in employee_attendance_sl_list:
+			salary_cost_gross = round((salary_cost_gross + attendance["Salary"]/days),2)
+
+		if self.net_sales != 0.0:
+			salary_cost_gross_percent = round(((salary_cost_gross / self.net_sales) * 100),3)
+		else:
+			salary_cost_gross_percent = 0.0
+		self.append("employee_costs_breakup", {"breakup": "Salary Cost Gross", "amount": salary_cost_gross,"percent":salary_cost_gross_percent})
+		self.total_employee_costs += salary_cost_gross
+
+		for expense in report_settings.employee_costs:
+			if self.net_sales != 0.0:
+				expense_percent = round(((expense.amount / self.net_sales) * 100),3)
+			else:
+				expense_percent = 0.0
+			self.append("employee_costs_breakup", {"breakup": expense.expense, "amount": expense.amount,"percent":expense_percent})
+			self.total_employee_costs += expense.amount
+		if self.net_sales != 0.0:
+			self.total_employee_costs_percent = round(((self.total_employee_costs / self.net_sales) * 100),3)
+		self.total_indirect_expenses += self.total_employee_costs
+
 		#INDIRECT EXPENSES
 		
-		self.total_indirect_expenses = 0
 		# Calculate and append Electricity
 		electricity_charges = electricity_reading * report_settings.electricity_charges
 		if self.net_sales != 0.0:

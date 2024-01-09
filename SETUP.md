@@ -34,4 +34,27 @@ Follow these steps to set up URY Pulse after completing basic ERPNext configurat
                 - **Expense** : Provide the expense name.
                 - **Percentage Type** : Choose the percentage type (Net Sales or Gross Sales).
                 - **Percent** : Specify the percentage of the selected type.
+        - Under **Employee Costs**:
+            - **Employee Costs** : Table to list daily fixed expenses as a part of employee costs.
+                - **Expense** : Provide the expense name.
+                - **Amount** : Specify amount for each expense.
     - **Depreciation** : Add depreciation amount if applicable.
+
+
+  ### Daily Gross Salary Cost is calculated from employees attendance.
+
+Follow these steps to set up the payment type and payment amount for employees:
+
+#### Step 1:
+
+- Navigate to **Employee** in  your site. 
+- Choose the relevant **Employee**.
+
+#### Step 2:
+
+- Under the **Salary** tab:
+    - **Payment Type** : Choose between Salary or Daily Wage.
+    - **Payment Amount** : Enter the corresponding payment amount. 
+
+
+Follow the [Attendance documentation](https://frappehr.com/docs/v14/en/attendance#3-features) for marking the attendance or use the [Employee Attendance Tool](https://frappehr.com/docs/v14/en/employee-attendance-tool#2-how-to-mark-attendance-using-employee-attendance-tool)

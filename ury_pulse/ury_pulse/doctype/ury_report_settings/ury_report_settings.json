@@ -20,9 +20,7 @@
   "indirect_fixed_expenses",
   "percentage_expenses",
   "employee_costs_section",
-  "bonus",
-  "staff_accommodation_charges",
-  "staff_food_charges",
+  "employee_costs",
   "section_break_4c2bz",
   "depreciation"
  ],
@@ -109,30 +107,11 @@
    "description": "<li>Daily Gross Salary Cost is calculated from employees attendance.</li>\n<br>",
    "fieldname": "employee_costs_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Employee Costs"
-  },
-  {
-   "fieldname": "bonus",
-   "fieldtype": "Currency",
-   "label": "Bonus",
-   "precision": "2"
-  },
-  {
-   "fieldname": "staff_food_charges",
-   "fieldtype": "Currency",
-   "label": "Staff Food Charges",
-   "precision": "2"
   },
   {
    "fieldname": "section_break_4c2bz",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "staff_accommodation_charges",
-   "fieldtype": "Currency",
-   "label": "Staff Accommodation Charges",
-   "precision": "2"
   },
   {
    "description": "Per Unit",
@@ -145,11 +124,18 @@
    "fieldtype": "Table",
    "label": "Burning Materials (Other Consumables)",
    "options": "URY Materials"
+  },
+  {
+   "description": "Daily Fixed",
+   "fieldname": "employee_costs",
+   "fieldtype": "Table",
+   "label": "Employee Costs",
+   "options": "URY Fixed Expenses"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-10-25 18:42:45.149783",
+ "modified": "2024-01-09 15:20:17.567008",
  "modified_by": "Administrator",
  "module": "URY Pulse",
  "name": "URY Report Settings",
