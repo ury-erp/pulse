@@ -1,0 +1,201 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"l8sKclPgDD\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Pulse</span>\",\"col\":12}},{\"id\":\"I63otkVjAk\",\"type\":\"card\",\"data\":{\"card_name\":\"URY Daily P and L\",\"col\":4}},{\"id\":\"01KFgrk4fi\",\"type\":\"card\",\"data\":{\"card_name\":\"URY Reports\",\"col\":4}}]",
+ "creation": "2024-02-12 18:04:02.244803",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "list-alt",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Pulse",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "URY Daily P and L",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "URY Daily P and L",
+   "link_count": 0,
+   "link_to": "URY Daily P and L",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "URY Report Settings",
+   "link_count": 0,
+   "link_to": "URY Report Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "URY Reports",
+   "link_count": 13,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Today's Sales",
+   "link_count": 0,
+   "link_to": "Today's Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daywise Sales",
+   "link_count": 0,
+   "link_to": "Daywise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daywise Invoices",
+   "link_count": 0,
+   "link_to": "Daywise Invoices",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Month Wise Sales",
+   "link_count": 0,
+   "link_to": "Month Wise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Average Bill Value",
+   "link_count": 0,
+   "link_to": "Average Bill Value",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Cancelled Invoices",
+   "link_count": 0,
+   "link_to": "Cancelled Invoices",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Item Wise Sales",
+   "link_count": 0,
+   "link_to": "Item Wise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Data",
+   "link_count": 0,
+   "link_to": "Customer Data",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Repeated Customers",
+   "link_count": 0,
+   "link_to": "Repeated Customers",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Sales",
+   "link_count": 0,
+   "link_to": "Employee Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Item Wise Sales",
+   "link_count": 0,
+   "link_to": "Employee Item Wise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Service Wise Sales",
+   "link_count": 0,
+   "link_to": "Service Wise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Time Wise Sales",
+   "link_count": 0,
+   "link_to": "Time Wise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2024-02-12 18:15:38.220508",
+ "modified_by": "Administrator",
+ "module": "URY Pulse",
+ "name": "Pulse",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "URY",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "URY Manager"
+  }
+ ],
+ "sequence_id": 39.0,
+ "shortcuts": [],
+ "title": "Pulse"
+}
