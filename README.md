@@ -3,7 +3,7 @@
 URY Pulse is a powerful reporting tool designed to provide comprehensive insights and analytics for restaurants. It offers a range of reports, including Daily Profit and Loss (P&L), as well as various other essential data to help restaurant owners and managers make informed decisions.
 
 > :warning: Warning : 
-> URY Pulse is currently in active development. Not recommended for use in production unless you know what you are doing.
+> URY Pulse is currently in active development, and we are continuously making changes, updates, and working on new features and improvements. Please be aware that until a stable release is reached, backward compatibility is not guaranteed. We make every effort to maintain compatibility.
 
 > :information_source: Note :
 > Our system has been successfully running at scale, serving over 10+ outlets for the past 10 months.
