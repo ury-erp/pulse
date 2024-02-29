@@ -80,6 +80,12 @@ class URYDailyPandL(Document):
 			INNER JOIN `tabPOS Invoice Item` b ON a.name = b.parent
 			LEFT JOIN `tabItem` c ON c.item_code = b.item_code
 			LEFT JOIN `tabProduct Bundle` d ON d.new_item_code = b.item_code
+			LEFT JOIN `tabBOM` e ON (
+				e.item = b.item_code
+				AND e.is_active = 1
+				AND e.is_default = 1
+				AND e.docstatus = 1
+			)
 			LEFT JOIN `tabURY Report Settings` rs ON (
 				rs.`branch` = %(branch)s
 			)
@@ -94,6 +100,44 @@ class URYDailyPandL(Document):
 					OR (rs.`branch` IS NULL AND a.`posting_date` = %(date)s)
 				)
 				AND d.new_item_code IS NULL
+				AND e.item IS NULL
+			GROUP BY 
+				c.item_name
+			ORDER BY 
+				c.item_group ASC, b.item_name ASC
+		''', {"branch": self.branch, "date": self.date}, as_dict=True)
+
+		bom_item_sales = frappe.db.sql('''
+			SELECT
+				c.item_group AS "Item Group",
+				c.item_code AS "Item Code",
+				c.item_name AS "Item Name",
+				SUM(b.qty) AS "Qty"
+			FROM `tabPOS Invoice` a
+			INNER JOIN `tabPOS Invoice Item` b ON a.name = b.parent
+			LEFT JOIN `tabItem` c ON c.item_code = b.item_code
+			LEFT JOIN `tabProduct Bundle` d ON d.new_item_code = b.item_code
+			LEFT JOIN `tabBOM` e ON (
+				e.item = b.item_code
+				AND e.is_active = 1
+				AND e.is_default = 1
+				AND e.docstatus = 1
+			)
+			LEFT JOIN `tabURY Report Settings` rs ON (
+				rs.`branch` = %(branch)s
+			)
+			WHERE 
+				a.`branch` = %(branch)s
+				AND a.`status` IN ("Consolidated", "Paid") 
+				AND a.`docstatus` = 1
+				AND
+				(
+					((rs.`hours` IS NULL OR rs.`hours` = 0) AND a.`posting_date` = %(date)s)
+					OR (rs.`hours` > 0 AND TIMESTAMP(a.`posting_date`, a.`posting_time`) <= TIMESTAMP(DATE_ADD(%(date)s, INTERVAL 1 DAY), CONCAT(LPAD(rs.`hours`, 2, '0'), ':00:00')) AND TIMESTAMP(a.`posting_date`, a.`posting_time`) >= TIMESTAMP(%(date)s, CONCAT(LPAD(rs.`hours`, 2, '0'), ':00:00')))
+					OR (rs.`branch` IS NULL AND a.`posting_date` = %(date)s)
+				)
+				AND d.new_item_code IS NULL
+				AND e.item IS NOT NULL
 			GROUP BY 
 				c.item_name
 			ORDER BY 
@@ -148,8 +192,32 @@ class URYDailyPandL(Document):
 				})
 				cogs = cogs + items_price[0].price_list_rate * qty
 		
-		unset_pb_item_prices = []
 		unset_bom_item_prices = []
+		for item in bom_item_sales:
+			buying_price = 0
+			buying_price_list = report_settings.buying_price_list
+			boms = frappe.db.get_all("BOM",fields = ("*"),filters = {'item':item['Item Code'],'is_active':1,'is_default':1,'docstatus':1})
+			bom = frappe.get_doc("BOM",boms[0].name)
+			bom_data = inner_bom_process(buying_price_list,bom)
+			bom_buying_price = bom_data['bom_buying_price']
+			unset_bom_items = bom_data['unset_bom_items']
+			buying_price += float(bom_buying_price)
+			for unset_item in unset_bom_items:
+				if unset_item not in unset_bom_item_prices:
+					unset_bom_item_prices.append(unset_item)
+			if buying_price > 0:
+				qty = float(item['Qty'])
+				self.append("cost_of_goods" ,{
+					"item_code":item['Item Code'],
+					"item_name":item['Item Name'],
+					"item_group":item['Item Group'],
+					"qty":qty,
+					"buying_price":buying_price,
+					"amount":buying_price * qty
+				})
+				cogs = cogs + buying_price * qty
+
+		unset_pb_item_prices = []
 		for item in pb_item_sales:
 			pb_items = frappe.db.get_all("Product Bundle",fields = ("*"),filters = {'new_item_code':item['Item Code']})
 			pb = frappe.get_doc("Product Bundle",pb_items[0].name)
@@ -178,7 +246,7 @@ class URYDailyPandL(Document):
 						buying_price += float(items_price[0].price_list_rate)*item_qty
 			
 			if buying_price > 0:
-				qty = int(item['Qty'])
+				qty = float(item['Qty'])
 				self.append("cost_of_goods" ,{
 					"item_code":item['Item Code'],
 					"item_name":item['Item Name'],
