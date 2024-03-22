@@ -52,6 +52,9 @@ frappe.ui.form.on('URY Daily P and L', {
 				}
 			});
 		}
+	},
+	date: function(frm){
+		set_electricity_closing(frm)
 	}
 });
 
@@ -64,6 +67,42 @@ function set_html_data(frm) {
 				frm.get_field("proft_loss_details").$wrapper.html(r.message);
 			}
 		});
+	}
+}
+
+function set_electricity_closing(frm) {
+	try{
+		var current_date_obj = new Date(frm.doc.date);
+
+		current_date_obj.setDate(current_date_obj.getDate() - 1);
+
+		var previous_date = current_date_obj.toISOString().split('T')[0];
+		if (frm.doc.branch && frm.doc.date){
+			frappe.call({
+				method: 'frappe.client.get_list',
+				args: {
+					doctype: 'URY Daily P and L',
+					fields: ['electricity_closing'],
+					filters: {
+						'branch': frm.doc.branch,
+						'date': previous_date
+					},
+					order_by: 'creation desc',
+				},
+				callback: function(response) {
+					if (response.message && response.message.length > 0) {
+						console.log(response.message)
+						frm.set_value("electricity_opening",response.message[0].electricity_closing)
+					}
+					else {
+						frm.set_value("electricity_opening","")
+					}
+				}
+			});
+		}
+	}
+	catch(err){
+		console.log("Last P and L not found")
 	}
 }
 
