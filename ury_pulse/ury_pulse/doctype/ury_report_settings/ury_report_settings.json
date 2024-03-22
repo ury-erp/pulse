@@ -18,6 +18,7 @@
   "indirect_expense_section",
   "electricity_charges",
   "indirect_fixed_expenses",
+  "monthly_fixed_expenses",
   "percentage_expenses",
   "employee_costs_section",
   "employee_costs",
@@ -131,11 +132,18 @@
    "fieldtype": "Table",
    "label": "Employee Costs",
    "options": "URY Fixed Expenses"
+  },
+  {
+   "description": "Monthly Fixed",
+   "fieldname": "monthly_fixed_expenses",
+   "fieldtype": "Table",
+   "label": "Monthly Fixed Expenses",
+   "options": "URY Fixed Expenses"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-09 15:20:17.567008",
+ "modified": "2024-03-22 15:34:04.572515",
  "modified_by": "Administrator",
  "module": "URY Pulse",
  "name": "URY Report Settings",

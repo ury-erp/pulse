@@ -493,6 +493,16 @@ class URYDailyPandL(Document):
 			self.append("indirect_expenses_breakup", {"breakup": expense.expense, "amount": expense.amount,"percent":expense_percent})
 			self.total_indirect_expenses += expense.amount
 
+		# Append indirect monthly fixed expenses
+		for expense in report_settings.monthly_fixed_expenses:
+			expense_amount = round((expense.amount/days),2)
+			if self.net_sales != 0.0:
+				expense_percent = round(((expense_amount / self.net_sales) * 100),3)
+			else:
+				expense_percent = 0.0
+			self.append("indirect_expenses_breakup", {"breakup": expense.expense, "amount": expense_amount,"percent":expense_percent})
+			self.total_indirect_expenses += expense_amount
+
 		# Calculate and append percentage expenses
 		for expense in report_settings.percentage_expenses:
 			if expense.percentage_type in ["Gross Sales", "Net Sales"]:
