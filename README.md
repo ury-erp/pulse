@@ -1,4 +1,6 @@
-# URY Pulse - Reporting Tool For Restaurants
+# ⚠️ This repository is no longer actively maintained. Please find the new location at [URY](https://github.com/ury-erp/ury)
+
+## URY Pulse - Reporting Tool For Restaurants
 
 URY Pulse is a powerful reporting tool designed to provide comprehensive insights and analytics for restaurants. It offers a range of reports, including Daily Profit and Loss (P&L), as well as various other essential data to help restaurant owners and managers make informed decisions.
 
