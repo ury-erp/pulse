@@ -284,6 +284,7 @@ class URYDailyPandL(Document):
 		self.direct_expenses_breakup = []
 		self.employee_costs_breakup = []
 		self.indirect_expenses_breakup = []
+		self.employee_wages = []
 
 		'''Total Sales Of the Day'''
 		gross_sales = frappe.db.sql('''
@@ -430,11 +431,15 @@ class URYDailyPandL(Document):
 		''', {"branch": self.branch, "date": self.date}, as_dict=True)
 
 		for attendance in employee_attendance_dw_list:
+			salary_cost_gross = 0
 			if attendance["Status"] == "Half Day":
 				salary_cost_gross = round((salary_cost_gross + 0.5 * attendance["Salary"]),2)
 			if attendance["Status"] == "Present":
 				salary_cost_gross = round((salary_cost_gross + attendance["Salary"]),2)
-
+			self.append("employee_wages", {
+				"employee": attendance["Employee"],
+				"employee_cost": salary_cost_gross	
+			})
 		date_str =  self.date
 		date_obj = datetime.strptime(date_str, '%Y-%m-%d')
 		year = date_obj.year
@@ -454,6 +459,10 @@ class URYDailyPandL(Document):
 
 		for attendance in employee_attendance_sl_list:
 			salary_cost_gross = round((salary_cost_gross + attendance["Salary"]/days),2)
+			self.append("employee_wages", {
+				"employee": attendance["Employee"],
+				"employee_cost": salary_cost_gross
+			})
 
 		if self.net_sales != 0.0:
 			salary_cost_gross_percent = round(((salary_cost_gross / self.net_sales) * 100),3)
