@@ -93,6 +93,7 @@ class URYDailyPandL(Document):
 				a.`branch` = %(branch)s
 				AND a.`status` IN ("Consolidated", "Paid") 
 				AND a.`docstatus` = 1
+				AND c.disabled = 0
 				AND
 				(
 					((rs.`hours` IS NULL OR rs.`hours` = 0) AND a.`posting_date` = %(date)s)
@@ -153,7 +154,7 @@ class URYDailyPandL(Document):
 			FROM `tabPOS Invoice` a
 			INNER JOIN `tabPOS Invoice Item` b ON a.name = b.parent
 			LEFT JOIN `tabItem` c ON c.item_code = b.item_code
-			LEFT JOIN `tabProduct Bundle` d ON d.new_item_code = b.item_code
+			LEFT JOIN `tabProduct Bundle` d ON d.new_item_code = b.item_code AND d.disabled = 0
 			LEFT JOIN `tabURY Report Settings` rs ON (
 				rs.`branch` = %(branch)s
 			)
@@ -219,43 +220,44 @@ class URYDailyPandL(Document):
 
 		unset_pb_item_prices = []
 		for item in pb_item_sales:
-			pb_items = frappe.db.get_all("Product Bundle",fields = ("*"),filters = {'new_item_code':item['Item Code']})
-			pb = frappe.get_doc("Product Bundle",pb_items[0].name)
-			buying_price = 0
-			for pb_item in pb.items:
-				item_qty = pb_item.qty
-				boms = frappe.db.get_all("BOM",fields = ("*"),filters = {'item':pb_item.item_code,'is_active':1,'is_default':1,'docstatus':1})
-				if len(boms) > 0:
-					buying_price_list = report_settings.buying_price_list
-					bom = frappe.get_doc("BOM",boms[0].name)
-					bom_data = inner_bom_process(buying_price_list,bom)
-					bom_buying_price = bom_data['bom_buying_price']
-					unset_bom_items = bom_data['unset_bom_items']
-					buying_price += float(bom_buying_price)*item_qty
-					for unset_item in unset_bom_items:
-						if unset_item not in unset_bom_item_prices:
-							unset_bom_item_prices.append(unset_item)
+			pb_items = frappe.db.get_all("Product Bundle",fields = ("*"),filters = {'new_item_code':item['Item Code'], 'disabled':0})
+			if pb_items:
+				pb = frappe.get_doc("Product Bundle",pb_items[0].name)
+				buying_price = 0
+				for pb_item in pb.items:
+					item_qty = pb_item.qty
+					boms = frappe.db.get_all("BOM",fields = ("*"),filters = {'item':pb_item.item_code,'is_active':1,'is_default':1,'docstatus':1})
+					if len(boms) > 0:
+						buying_price_list = report_settings.buying_price_list
+						bom = frappe.get_doc("BOM",boms[0].name)
+						bom_data = inner_bom_process(buying_price_list,bom)
+						bom_buying_price = bom_data['bom_buying_price']
+						unset_bom_items = bom_data['unset_bom_items']
+						buying_price += float(bom_buying_price)*item_qty
+						for unset_item in unset_bom_items:
+							if unset_item not in unset_bom_item_prices:
+								unset_bom_item_prices.append(unset_item)
 				else:
-					sub_item = frappe.get_doc("Item",pb_item.item_code)
-					item_name = sub_item.item_name
-					items_price = frappe.db.get_all("Item Price",fields = ['name','price_list_rate'],filters = {'price_list':report_settings.buying_price_list,'item_code':pb_item.item_code})
-					if len(items_price) == 0:
-						if item_name not in unset_pb_item_prices:
-							unset_pb_item_prices.append(item_name)
-					else:
-						buying_price += float(items_price[0].price_list_rate)*item_qty
-			
-			if buying_price > 0:
-				qty = float(item['Qty'])
-				self.append("cost_of_goods" ,{
-					"item_code":item['Item Code'],
-					"item_name":item['Item Name'],
-					"item_group":item['Item Group'],
-					"qty":qty,
-					"buying_price":buying_price,
-					"amount":buying_price * qty
-				})
-				cogs = cogs + buying_price * qty
+						sub_item = frappe.get_doc("Item",pb_item.item_code)
+						item_name = sub_item.item_name
+						items_price = frappe.db.get_all("Item Price",fields = ['name','price_list_rate'],filters = {'price_list':report_settings.buying_price_list,'item_code':pb_item.item_code})
+						if len(items_price) == 0:
+							if item_name not in unset_pb_item_prices:
+								unset_pb_item_prices.append(item_name)
+						else:
+							buying_price += float(items_price[0].price_list_rate)*item_qty
+				
+				if buying_price > 0:
+					qty = float(item['Qty'])
+					self.append("cost_of_goods" ,{
+						"item_code":item['Item Code'],
+						"item_name":item['Item Name'],
+						"item_group":item['Item Group'],
+						"qty":qty,
+						"buying_price":buying_price,
+						"amount":buying_price * qty
+					})
+					cogs = cogs + buying_price * qty
 		self.cogs = cogs
 		
 		unset_prices = [
@@ -427,7 +429,9 @@ class URYDailyPandL(Document):
 			WHERE 
 				b.`attendance_date` = %(date)s
 				AND c.`branch` = %(branch)s
-				AND c.`payment_type` = "Daily Wage"                        
+				AND c.`payment_type` = "Daily Wage"
+				AND b.`docstatus` = 1
+				AND b.`status` != "Absent"                        
 		''', {"branch": self.branch, "date": self.date}, as_dict=True)
 
 		for attendance in employee_attendance_dw_list:
@@ -455,6 +459,7 @@ class URYDailyPandL(Document):
 			WHERE 
 				b.`branch` = %(branch)s
 				AND b.`payment_type` = "Salary"                        
+				AND b.`status` = "Active"                        
 		''', {"branch": self.branch, "date": self.date}, as_dict=True)
 
 		for attendance in employee_attendance_sl_list:
