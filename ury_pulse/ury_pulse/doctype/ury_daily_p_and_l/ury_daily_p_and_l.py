@@ -504,9 +504,47 @@ class URYDailyPandL(Document):
 			self.total_indirect_expenses += expense_amount
 
 		# Calculate and append percentage expenses
+		aggregator_gross_sales = None
 		for expense in report_settings.percentage_expenses:
 			if expense.percentage_type in ["Gross Sales", "Net Sales"]:
 				base_amount = self.gross_sales if expense.percentage_type == "Gross Sales" else self.net_sales
+				amount = round((expense.percent * base_amount) / 100, 2)
+				if self.net_sales != 0.0:
+					expense_percent = round(((amount / self.net_sales) * 100),3)
+				else:
+					expense_percent = 0.0
+				self.append("indirect_expenses_breakup", {"breakup": expense.expense, "amount": amount ,"percent":expense_percent})
+				self.total_indirect_expenses += amount
+			if expense.percentage_type == "Aggregator Sales":
+				if aggregator_gross_sales is None:
+					aggregator_sales_query = frappe.db.sql('''
+						SELECT
+							COUNT(b.`name`) AS "Total Invoices",
+							ROUND(SUM(b.`grand_total`),2) AS "Grand Total"
+						FROM `tabPOS Invoice` b
+						LEFT JOIN `tabURY Report Settings` rs ON (
+							rs.`branch` = %(branch)s
+						)
+						WHERE 
+							b.`branch` = %(branch)s
+							AND b.`order_type` = "Aggregators"
+							AND b.`status` IN ("Consolidated", "Paid") 
+							AND b.`docstatus` = 1
+							AND
+							(
+								((rs.`hours` IS NULL OR rs.`hours` = 0) AND b.`posting_date` = %(date)s)
+								OR (
+									rs.`hours` > 0
+									AND TIMESTAMP(b.`posting_date`, b.`posting_time`) <= TIMESTAMP(DATE_ADD(%(date)s, INTERVAL 1 DAY), CONCAT(LPAD(rs.`hours`, 2, '0'), ':00:00'))
+									AND TIMESTAMP(b.`posting_date`, b.`posting_time`) >= TIMESTAMP(%(date)s, CONCAT(LPAD(rs.`hours`, 2, '0'), ':00:00'))
+								)
+								OR (rs.`branch` IS NULL AND b.`posting_date` = %(date)s)
+							)
+					''', {"branch": self.branch, "date": self.date}, as_dict=True)
+
+					aggregator_gross_sales = aggregator_sales_query[0]["Grand Total"] if aggregator_sales_query and aggregator_sales_query[0]["Total Invoices"] > 0 else 0.0
+
+				base_amount = aggregator_gross_sales
 				amount = round((expense.percent * base_amount) / 100, 2)
 				if self.net_sales != 0.0:
 					expense_percent = round(((amount / self.net_sales) * 100),3)
