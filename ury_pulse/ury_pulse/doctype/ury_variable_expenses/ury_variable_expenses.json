@@ -24,7 +24,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Percentage Type",
-   "options": "Gross Sales\nNet Sales",
+   "options": "Gross Sales\nNet Sales\nAggregator Sales",
    "reqd": 1
   },
   {
