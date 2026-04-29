@@ -435,14 +435,17 @@ class URYDailyPandL(Document):
 		''', {"branch": self.branch, "date": self.date}, as_dict=True)
 
 		for attendance in employee_attendance_dw_list:
-			salary_cost_gross = 0
+			emp_wage = 0
 			if attendance["Status"] == "Half Day":
-				salary_cost_gross = round((salary_cost_gross + 0.5 * attendance["Salary"]),2)
+				emp_wage = round((0.5 * attendance["Salary"]),2)
 			if attendance["Status"] == "Present":
-				salary_cost_gross = round((salary_cost_gross + attendance["Salary"]),2)
+				emp_wage = round((attendance["Salary"]),2)
+
+			salary_cost_gross = round((salary_cost_gross + emp_wage), 2)
+
 			self.append("employee_wages", {
 				"employee": attendance["Employee"],
-				"employee_cost": salary_cost_gross	
+				"employee_cost": emp_wage	
 			})
 		date_str =  self.date
 		date_obj = datetime.strptime(date_str, '%Y-%m-%d')
@@ -463,10 +466,11 @@ class URYDailyPandL(Document):
 		''', {"branch": self.branch, "date": self.date}, as_dict=True)
 
 		for attendance in employee_attendance_sl_list:
-			salary_cost_gross = round((salary_cost_gross + attendance["Salary"]/days),2)
+			emp_wage = round((attendance["Salary"]/days),2)
+			salary_cost_gross = round((salary_cost_gross + emp_wage), 2)
 			self.append("employee_wages", {
 				"employee": attendance["Employee"],
-				"employee_cost": salary_cost_gross
+				"employee_cost": emp_wage
 			})
 
 		if self.net_sales != 0.0:
