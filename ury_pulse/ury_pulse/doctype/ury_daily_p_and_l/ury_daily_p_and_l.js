@@ -111,5 +111,17 @@ frappe.ui.form.on('URY P and L Materials', {
 		var row = locals[cdt][cdn];
 		row.amount = row.cost_per_unit*row.units_consumed
 		frm.refresh_fields();
+	},
+	opening: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if (row.opening && row.closing) {
+			frappe.model.set_value(cdt, cdn, 'units_consumed', flt(row.closing) - flt(row.opening));
+		}
+	},
+	closing: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if (row.opening && row.closing) {
+			frappe.model.set_value(cdt, cdn, 'units_consumed', flt(row.closing) - flt(row.opening));
+		}
 	}
 });

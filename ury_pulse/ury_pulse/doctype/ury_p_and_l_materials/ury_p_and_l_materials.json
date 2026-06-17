@@ -10,7 +10,9 @@
   "material",
   "cost_per_unit",
   "units_consumed",
-  "amount"
+  "amount",
+  "opening",
+  "closing"
  ],
  "fields": [
   {
@@ -46,17 +48,30 @@
    "label": "Material",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "opening",
+   "fieldtype": "Data",
+   "label": "Opening"
+  },
+  {
+   "fieldname": "closing",
+   "fieldtype": "Data",
+   "label": "Closing"
   }
  ],
+ "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-10-06 11:51:11.653896",
+ "modified": "2026-06-17 18:58:29.899054",
  "modified_by": "Administrator",
  "module": "URY Pulse",
  "name": "URY P and L Materials",
  "owner": "Administrator",
  "permissions": [],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
